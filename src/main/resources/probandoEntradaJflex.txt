@@ -1,0 +1,11 @@
+int x = 5;
+int y = 10;
+int z;
+
+z = x + y;
+
+if (z > 10) {
+    PRINT ("Resultado mayor que 10");
+} else {
+    PRINT ("Resultado menor o igual a 10");
+}
