@@ -16,8 +16,6 @@ import java_cup.runtime.Symbol; // Importar la clase Symbol de CUP
 %eofval}
 
 %{
-  // Código que sera utilizado
-  // public String lexema; // No es necesario si estás retornando Symbol
 %}
 
 %cup

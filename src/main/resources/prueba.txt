@@ -1,5 +1,5 @@
 FUNCTION factorial(n)
-	DEFINE resultado = 1;
+	DEFINE resultado = 1
 	WHILE n > 1 DO
 		resultado = resultado * n;
 		n = n - 1;
