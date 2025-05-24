@@ -3,10 +3,10 @@ FUNCTION factorial(n)
 	WHILE n > 1 DO
 		resultado = resultado * n;
 		n = n - 1;
-	END
+	END 
 	RETURN resultado;
-END
-DEFINE num = 5;
+	END
+	DEFINE num = 5;
 DEFINE fact = factorial(num);
 PRINT "El factorial de ", num, " es ", fact;
 IF fact > 100 THEN

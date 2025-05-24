@@ -37,8 +37,8 @@ terminal PLUS, MINUS, MULT, DIV;
 terminal EQEQ, NEQ, GTE, LTE, GT, LT;
 terminal AND, OR, NOT;
 
-terminal Integer NUMERO;     // Declaramos el tipo del valor que viene de JFlex
-terminal Float FLOTANTE;     // Declaramos el tipo del valor que viene de JFlex
+terminal Integer NUMERO;      // Declaramos el tipo del valor que viene de JFlex
+terminal Float FLOTANTE;      // Declaramos el tipo del valor que viene de JFlex
 terminal String CADENA;      // Declaramos el tipo del valor que viene de JFlex
 terminal String IDENTIFICADOR; // Declaramos el tipo del valor que viene de JFlex
 terminal TRUE, FALSE; // Literales booleanos
@@ -77,60 +77,60 @@ statementList ::= statementList:s statement:st
                 ;
 
 statement ::= DEFINE IDENTIFICADOR:id ASSIGN expr:e SEMICOLON
-            {: System.out.println("Declaración de variable: " + id + " = " + e); :}
+            /* No se imprime aquí para evitar verbosidad */
             | functionDef
             | IF expr:cond THEN statementList:ifBody elseIfList:elseIfs elsePart:elseP END
-            {: System.out.println("Sentencia IF/ELSEIF/ELSE"); :}
+            /* No se imprime aquí para evitar verbosidad */
             | WHILE expr:cond DO statementList:loopBody END
-            {: System.out.println("Sentencia WHILE"); :}
+            /* No se imprime aquí para evitar verbosidad */
             | PRINT exprList:printItems SEMICOLON
-            {: System.out.println("Sentencia PRINT"); :}
+            /* No se imprime aquí para evitar verbosidad */
             ;
 
 elseIfList ::= elseIfList:list ELSEIF expr:cond THEN statementList:body
-             | /* vacío */
-             ;
+              | /* vacío */
+              ;
 
 elsePart ::= ELSE statementList:body
-           | /* vacío */
-           ;
+            | /* vacío */
+            ;
 
 functionDef ::= FUNCTION IDENTIFICADOR:id LPAREN paramListOpt:params RPAREN statementList:body END
-              {: System.out.println("Definición de función: " + id + " con parámetros: " + params); :}
+              /* No se imprime aquí para evitar verbosidad */
               ;
 
 paramListOpt ::= paramList:p
-               | /* vacío */
-               ;
+                | /* vacío */
+                ;
 
 paramList ::= IDENTIFICADOR:id
-            {: RESULT = id; :} // Pasa el identificador
+            {: RESULT = id; :}
             | paramList:list COMMA IDENTIFICADOR:id
-            {: RESULT = list + ", " + id; :} // Concatena los identificadores
+            {: RESULT = list + ", " + id; :}
             ;
 
 exprList ::= expr:e
-           | exprList:list COMMA expr:e
-           ;
+            | exprList:list COMMA expr:e
+            ;
 
-expr ::= expr:e1 PLUS expr:e2       {: RESULT = "(" + e1 + " + " + e2 + ")"; :}
-       | expr:e1 MINUS expr:e2      {: RESULT = "(" + e1 + " - " + e2 + ")"; :}
-       | expr:e1 MULT expr:e2       {: RESULT = "(" + e1 + " * " + e2 + ")"; :}
-       | expr:e1 DIV expr:e2        {: RESULT = "(" + e1 + " / " + e2 + ")"; :}
-       | expr:e1 LT expr:e2         {: RESULT = "(" + e1 + " < " + e2 + ")"; :}
-       | expr:e1 GT expr:e2         {: RESULT = "(" + e1 + " > " + e2 + ")"; :}
-       | expr:e1 LTE expr:e2        {: RESULT = "(" + e1 + " <= " + e2 + ")"; :}
-       | expr:e1 GTE expr:e2        {: RESULT = "(" + e1 + " >= " + e2 + ")"; :}
-       | expr:e1 EQEQ expr:e2       {: RESULT = "(" + e1 + " == " + e2 + ")"; :}
-       | expr:e1 NEQ expr:e2        {: RESULT = "(" + e1 + " != " + e2 + ")"; :}
-       | expr:e1 AND expr:e2        {: RESULT = "(" + e1 + " && " + e2 + ")"; :}
-       | expr:e1 OR expr:e2         {: RESULT = "(" + e1 + " || " + e2 + ")"; :}
-       | NOT expr:e                 {: RESULT = "!" + e; :}
-       | LPAREN expr:e RPAREN       {: RESULT = e; :}
-       | NUMERO:n                   {: RESULT = n.toString(); :} // Accede al valor entero
-       | FLOTANTE:f                 {: RESULT = f.toString(); :} // Accede al valor flotante
-       | IDENTIFICADOR:id           {: RESULT = id; :}          // Accede al valor de la cadena
-       | CADENA:s                   {: RESULT = "\"" + s + "\""; :} // Accede al valor de la cadena
-       | TRUE                       {: RESULT = "TRUE"; :}
-       | FALSE                      {: RESULT = "FALSE"; :}
-       ;
+expr ::= expr:e1 PLUS expr:e2      {: RESULT = "(" + e1 + " + " + e2 + ")"; :}
+        | expr:e1 MINUS expr:e2    {: RESULT = "(" + e1 + " - " + e2 + ")"; :}
+        | expr:e1 MULT expr:e2     {: RESULT = "(" + e1 + " * " + e2 + ")"; :}
+        | expr:e1 DIV expr:e2      {: RESULT = "(" + e1 + " / " + e2 + ")"; :}
+        | expr:e1 LT expr:e2       {: RESULT = "(" + e1 + " < " + e2 + ")"; :}
+        | expr:e1 GT expr:e2       {: RESULT = "(" + e1 + " > " + e2 + ")"; :}
+        | expr:e1 LTE expr:e2      {: RESULT = "(" + e1 + " <= " + e2 + ")"; :}
+        | expr:e1 GTE expr:e2      {: RESULT = "(" + e1 + " >= " + e2 + ")"; :}
+        | expr:e1 EQEQ expr:e2     {: RESULT = "(" + e1 + " == " + e2 + ")"; :}
+        | expr:e1 NEQ expr:e2      {: RESULT = "(" + e1 + " != " + e2 + ")"; :}
+        | expr:e1 AND expr:e2      {: RESULT = "(" + e1 + " && " + e2 + ")"; :}
+        | expr:e1 OR expr:e2       {: RESULT = "(" + e1 + " || " + e2 + ")"; :}
+        | NOT expr:e               {: RESULT = "!" + e; :}
+        | LPAREN expr:e RPAREN     {: RESULT = e; :}
+        | NUMERO:n                 {: RESULT = n.toString(); :}
+        | FLOTANTE:f               {: RESULT = f.toString(); :}
+        | IDENTIFICADOR:id         {: RESULT = id; :}
+        | CADENA:s                 {: RESULT = "\"" + s + "\""; :}
+        | TRUE                     {: RESULT = "TRUE"; :}
+        | FALSE                    {: RESULT = "FALSE"; :}
+        ;
