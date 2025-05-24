@@ -1,0 +1,23 @@
+FUNCTION factorial(n)
+	DEFINE resultado = 1;
+	WHILE n > 1 DO
+		resultado = resultado * n;
+		n = n - 1;
+	END
+	RETURN resultado;
+END
+DEFINE num = 5;
+DEFINE fact = factorial(num);
+PRINT "El factorial de ", num, " es ", fact;
+IF fact > 100 THEN
+	PRINT "El resultado es mayor que 100";
+ELSE
+	PRINT "El resultado es menor o igual a 100";
+END
+DEFINE a = true;
+DEFINE b = false;
+IF a AND NOT b THEN
+	PRINT "La condición lógica es verdadera";
+ELSE
+	PRINT "La condición lógica es falsa";
+END

@@ -1,0 +1,136 @@
+package org.example;
+import java_cup.runtime.*;
+
+parser code {:
+    public void report_error(String message, Object info) {
+        StringBuilder m = new StringBuilder("Error");
+        if (info instanceof Symbol) {
+            Symbol s = (Symbol) info;
+            if (s.left >= 0) {
+                m.append(" en línea ").append(s.left + 1); // +1 because JFlex lines are 0-indexed
+            }
+            if (s.right >= 0) {
+                m.append(", columna ").append(s.right + 1); // +1 because JFlex columns are 0-indexed
+            }
+            if (s.value != null) {
+                m.append(": '").append(s.value).append("'");
+            }
+        }
+        m.append(" : ").append(message);
+        System.err.println(m);
+    }
+
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+
+    public void report_program_recognized() {
+        System.out.println("Programa reconocido correctamente.");
+    }
+:};
+
+/* Terminales: Coinciden con los tokens que devuelve JFlex */
+terminal DEFINE, FUNCTION, RETURN, IF, ELSE, ELSEIF, WHILE, LOOP, END, THEN, DO, PRINT;
+terminal SEMICOLON, COMMA, LPAREN, RPAREN, LBRACE, RBRACE, ASSIGN;
+terminal PLUS, MINUS, MULT, DIV;
+terminal EQEQ, NEQ, GTE, LTE, GT, LT;
+terminal AND, OR, NOT;
+
+terminal Integer NUMERO;     // Declaramos el tipo del valor que viene de JFlex
+terminal Float FLOTANTE;     // Declaramos el tipo del valor que viene de JFlex
+terminal String CADENA;      // Declaramos el tipo del valor que viene de JFlex
+terminal String IDENTIFICADOR; // Declaramos el tipo del valor que viene de JFlex
+terminal TRUE, FALSE; // Literales booleanos
+
+// Tipos de datos (opcional si no los usas en la gramática, pero es buena práctica)
+terminal TYPE_INT, TYPE_BOOLEAN, TYPE_FLOAT, TYPE_STRING;
+
+/* No terminales */
+nonterminal program;
+nonterminal statement;
+nonterminal statementList;
+nonterminal expr;
+nonterminal functionDef;
+nonterminal exprList;
+nonterminal paramList;
+nonterminal paramListOpt;
+nonterminal elseIfList;
+nonterminal elsePart;
+
+
+// Precedencia y asociatividad
+precedence left OR;
+precedence left AND;
+precedence left EQEQ, NEQ;
+precedence left LT, LTE, GT, GTE;
+precedence left PLUS, MINUS;
+precedence left MULT, DIV;
+precedence right NOT; // Negación lógica
+
+start with program;
+
+program ::= statementList:s {: parser.report_program_recognized(); :} ;
+
+statementList ::= statementList:s statement:st
+                | statement:st
+                ;
+
+statement ::= DEFINE IDENTIFICADOR:id ASSIGN expr:e SEMICOLON
+            {: System.out.println("Declaración de variable: " + id + " = " + e); :}
+            | functionDef
+            | IF expr:cond THEN statementList:ifBody elseIfList:elseIfs elsePart:elseP END
+            {: System.out.println("Sentencia IF/ELSEIF/ELSE"); :}
+            | WHILE expr:cond DO statementList:loopBody END
+            {: System.out.println("Sentencia WHILE"); :}
+            | PRINT exprList:printItems SEMICOLON
+            {: System.out.println("Sentencia PRINT"); :}
+            ;
+
+elseIfList ::= elseIfList:list ELSEIF expr:cond THEN statementList:body
+             | /* vacío */
+             ;
+
+elsePart ::= ELSE statementList:body
+           | /* vacío */
+           ;
+
+functionDef ::= FUNCTION IDENTIFICADOR:id LPAREN paramListOpt:params RPAREN statementList:body END
+              {: System.out.println("Definición de función: " + id + " con parámetros: " + params); :}
+              ;
+
+paramListOpt ::= paramList:p
+               | /* vacío */
+               ;
+
+paramList ::= IDENTIFICADOR:id
+            {: RESULT = id; :} // Pasa el identificador
+            | paramList:list COMMA IDENTIFICADOR:id
+            {: RESULT = list + ", " + id; :} // Concatena los identificadores
+            ;
+
+exprList ::= expr:e
+           | exprList:list COMMA expr:e
+           ;
+
+expr ::= expr:e1 PLUS expr:e2       {: RESULT = "(" + e1 + " + " + e2 + ")"; :}
+       | expr:e1 MINUS expr:e2      {: RESULT = "(" + e1 + " - " + e2 + ")"; :}
+       | expr:e1 MULT expr:e2       {: RESULT = "(" + e1 + " * " + e2 + ")"; :}
+       | expr:e1 DIV expr:e2        {: RESULT = "(" + e1 + " / " + e2 + ")"; :}
+       | expr:e1 LT expr:e2         {: RESULT = "(" + e1 + " < " + e2 + ")"; :}
+       | expr:e1 GT expr:e2         {: RESULT = "(" + e1 + " > " + e2 + ")"; :}
+       | expr:e1 LTE expr:e2        {: RESULT = "(" + e1 + " <= " + e2 + ")"; :}
+       | expr:e1 GTE expr:e2        {: RESULT = "(" + e1 + " >= " + e2 + ")"; :}
+       | expr:e1 EQEQ expr:e2       {: RESULT = "(" + e1 + " == " + e2 + ")"; :}
+       | expr:e1 NEQ expr:e2        {: RESULT = "(" + e1 + " != " + e2 + ")"; :}
+       | expr:e1 AND expr:e2        {: RESULT = "(" + e1 + " && " + e2 + ")"; :}
+       | expr:e1 OR expr:e2         {: RESULT = "(" + e1 + " || " + e2 + ")"; :}
+       | NOT expr:e                 {: RESULT = "!" + e; :}
+       | LPAREN expr:e RPAREN       {: RESULT = e; :}
+       | NUMERO:n                   {: RESULT = n.toString(); :} // Accede al valor entero
+       | FLOTANTE:f                 {: RESULT = f.toString(); :} // Accede al valor flotante
+       | IDENTIFICADOR:id           {: RESULT = id; :}          // Accede al valor de la cadena
+       | CADENA:s                   {: RESULT = "\"" + s + "\""; :} // Accede al valor de la cadena
+       | TRUE                       {: RESULT = "TRUE"; :}
+       | FALSE                      {: RESULT = "FALSE"; :}
+       ;
