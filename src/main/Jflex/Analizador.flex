@@ -1,6 +1,6 @@
 package org.example;
 
-import java_cup.runtime.Symbol; // Importar la clase Symbol de CUP
+import java_cup.runtime.Symbol;
 
 %%
 /*
@@ -12,7 +12,7 @@ import java_cup.runtime.Symbol; // Importar la clase Symbol de CUP
 %line
 %column
 %eofval{
-    return new Symbol(sym.EOF, yyline, yycolumn); // Devuelve el token EOF al final del archivo con línea y columna
+    return new Symbol(sym.EOF, yyline, yycolumn); 
 %eofval}
 
 %{

@@ -7,10 +7,10 @@ parser code {:
         if (info instanceof Symbol) {
             Symbol s = (Symbol) info;
             if (s.left >= 0) {
-                m.append(" en línea ").append(s.left + 1); // +1 because JFlex lines are 0-indexed
+                m.append(" en línea ").append(s.left + 1); 
             }
             if (s.right >= 0) {
-                m.append(", columna ").append(s.right + 1); // +1 because JFlex columns are 0-indexed
+                m.append(", columna ").append(s.right + 1);
             }
             if (s.value != null) {
                 m.append(": '").append(s.value).append("'");
@@ -43,7 +43,6 @@ terminal String CADENA;      // Declaramos el tipo del valor que viene de JFlex
 terminal String IDENTIFICADOR; // Declaramos el tipo del valor que viene de JFlex
 terminal TRUE, FALSE; // Literales booleanos
 
-// Tipos de datos (opcional si no los usas en la gramática, pero es buena práctica)
 terminal TYPE_INT, TYPE_BOOLEAN, TYPE_FLOAT, TYPE_STRING;
 
 /* No terminales */
@@ -66,7 +65,7 @@ precedence left EQEQ, NEQ;
 precedence left LT, LTE, GT, GTE;
 precedence left PLUS, MINUS;
 precedence left MULT, DIV;
-precedence right NOT; // Negación lógica
+precedence right NOT;
 
 start with program;
 
@@ -77,14 +76,10 @@ statementList ::= statementList:s statement:st
                 ;
 
 statement ::= DEFINE IDENTIFICADOR:id ASSIGN expr:e SEMICOLON
-            /* No se imprime aquí para evitar verbosidad */
             | functionDef
             | IF expr:cond THEN statementList:ifBody elseIfList:elseIfs elsePart:elseP END
-            /* No se imprime aquí para evitar verbosidad */
             | WHILE expr:cond DO statementList:loopBody END
-            /* No se imprime aquí para evitar verbosidad */
             | PRINT exprList:printItems SEMICOLON
-            /* No se imprime aquí para evitar verbosidad */
             ;
 
 elseIfList ::= elseIfList:list ELSEIF expr:cond THEN statementList:body
@@ -96,7 +91,6 @@ elsePart ::= ELSE statementList:body
             ;
 
 functionDef ::= FUNCTION IDENTIFICADOR:id LPAREN paramListOpt:params RPAREN statementList:body END
-              /* No se imprime aquí para evitar verbosidad */
               ;
 
 paramListOpt ::= paramList:p
