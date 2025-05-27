@@ -1,0 +1,120 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center; /* Centra el forms-wrapper horizontalmente */
+    align-items: flex-start; /* Alinea el forms-wrapper en la parte superior */
+    min-height: 100vh;
+}
+
+.forms-wrapper {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 900px; /* Ajusta este ancho máximo para todo el contenedor principal */
+    width: 100%;
+    box-sizing: border-box;
+
+    /* Propiedades clave para apilar los elementos verticalmente (h1, top-forms-container, results-fieldset) */
+    display: flex;
+    flex-direction: column;
+    gap: 30px; /* Espacio entre los elementos apilados */
+
+    align-items: center; /* Centra los elementos hijos horizontalmente dentro del wrapper */
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 0; /* 'gap' del padre maneja el espacio */
+}
+
+/* Contenedor para los dos formularios superiores (Subir Archivo y Escribir Texto) */
+.top-forms-container {
+    /* Propiedades clave para alinear los dos formularios en una fila */
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos salten de línea si no caben */
+    justify-content: center; /* Centra los formularios dentro de este contenedor */
+    gap: 20px; /* Espacio entre los dos formularios superiores */
+    width: 100%; /* Ocupa el 100% del forms-wrapper */
+}
+
+/* Estilos para los formularios individuales dentro de top-forms-container */
+form {
+    flex: 1 1 45%; /* Permite que los formularios crezcan/encoja y tengan un tamaño base del 45% */
+    min-width: 350px; /* Ancho mínimo para cada formulario, ajusta si es necesario */
+    box-sizing: border-box;
+    border: none; /* Quitamos el borde del form si el fieldset ya lo tiene */
+    padding: 0;
+    margin: 0;
+}
+
+/* Estilos para todos los fieldsets (aplicados a los de los formularios y el de resultados) */
+fieldset {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    box-sizing: border-box;
+    height: 100%; /* Asegura que los fieldsets ocupen la altura completa de su contenedor flex */
+    display: flex;
+    flex-direction: column; /* Apila el contenido dentro de cada fieldset */
+}
+
+/* Estilos específicos para el fieldset de resultados */
+fieldset.results-fieldset {
+    border-color: #007bff; /* Borde diferente */
+    background-color: #e6f2ff; /* Fondo ligeramente azulado */
+    width: 100%; /* Asegura que ocupe el ancho del forms-wrapper */
+    min-height: 250px; /* Altura mínima para el cuadro de resultados */
+}
+
+legend {
+    font-weight: bold;
+    color: #333;
+    padding: 0 8px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="file"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-top: 5px;
+    flex-grow: 1; /* Permite que el textarea crezca para llenar el espacio vertical */
+}
+
+textarea#resultadosAnalisis {
+    background-color: #f8f8f8;
+    font-family: 'Consolas', 'Monaco', monospace;
+    color: #343a40;
+    resize: vertical;
+    min-height: 150px; /* Altura mínima para el textarea de resultados */
+}
+
+button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: auto; /* Empuja el botón al final si el fieldset es flex column */
+    align-self: flex-start; /* Alinea el botón a la izquierda */
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}

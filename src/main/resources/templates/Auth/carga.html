@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/static/CSS/style.css">
+</head>
+
+<body>
+<div class="forms-wrapper">
+    <h1>Subir Archivos y Escribir Texto</h1>
+
+    <div class="top-forms-container">
+        <form action="/procesar" method="post" enctype="multipart/form-data">
+            <fieldset>
+                <legend>Subir Archivo</legend>
+                <input type="file" id="archivo" name="archivo" accept="image/*, .pdf"><br><br>
+                <button type="submit">Enviar</button>
+            </fieldset>
+        </form>
+
+        <form action="/procesardatos" method="post" enctype="multipart/form-data">
+            <fieldset>
+                <legend>Escribir Texto</legend>
+                <textarea id="mensaje" name="mensaje" rows="7" cols="60" placeholder="escribe tu texto"></textarea><br><br>
+            </fieldset>
+            <button type="submit">Enviar</button>
+        </form>
+    </div> <fieldset class="results-fieldset">
+    <legend>Resultados del Análisis</legend>
+    <label for="resultadosAnalisis">Salida:</label><br>
+    <textarea id="resultadosAnalisis" name="resultadosAnalisis" rows="15" cols="80" readonly placeholder="Aquí se mostrarán los resultados de la compilación o el procesamiento."></textarea>
+</fieldset>
+
+</div> </body>
+</html>

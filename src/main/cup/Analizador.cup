@@ -18,11 +18,13 @@ parser code {:
         }
         m.append(" : ").append(message);
         System.err.println(m);
+        //IMPRIME MENSAJES DE ERROR EN CONSOLA
     }
 
     public void report_fatal_error(String message, Object info) {
         report_error(message, info);
         System.exit(1);
+        //IMPRIME EL VALOR FATAL Y TERMINA EL PROGRAMA
     }
 
     public void report_program_recognized() {

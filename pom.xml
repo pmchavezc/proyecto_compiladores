@@ -27,8 +27,10 @@
                         </goals>
                         <configuration>
                             <lexDefs>
+                                <!--Este archivo describe las reglas para reconocer tokens en el código fuente -->
                                 <lexDef>src/main/jflex/lexicoAnalizador.jflex</lexDef>
                             </lexDefs>
+                                <!--Este archivo describe las reglas para reconocer tokens en el código fuente-->
                             <outputDirectory>${project.build.directory}/generated-sources/jflex</outputDirectory>
                         </configuration>
                     </execution>
@@ -67,6 +69,7 @@
                         </goals>
                         <configuration>
                             <sources>
+                                <!-- Agregar las carpetas generadas por JFlex y CUP como fuentes -->
                                 <source>${project.build.directory}/generated-sources/jflex</source>
                                 <source>${project.build.directory}/generated-sources/cup</source>
                             </sources>
