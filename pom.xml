@@ -35,7 +35,7 @@
                         <configuration>
                             <lexDefinitions>
                                 <!--Este archivo describe las reglas para reconocer tokens en el código fuente -->
-                                <lexDefinition>src/main/jflex/Analizador.flex</lexDefinition>
+                                <lexDefinition>src/main/Jflex/Analizador.flex</lexDefinition>
                             </lexDefinitions>
                                 <!--Este archivo describe las reglas para reconocer tokens en el código fuente-->
                             <outputDirectory>${project.build.directory}/generated-sources/jflex</outputDirectory>
