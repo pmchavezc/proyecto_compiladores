@@ -1,6 +1,7 @@
 package org.example;
 
 import java_cup.runtime.Symbol;
+import java.io.PrintWriter; // Asegúrate de que esta importación está fuera del %{ %}
 
 %%
 /*
@@ -12,13 +13,34 @@ import java_cup.runtime.Symbol;
 %line
 %column
 %eofval{
-    return new Symbol(sym.EOF, yyline, yycolumn); 
+    return new Symbol(sym.EOF, yyline, yycolumn);
 %eofval}
 
 %{
+private PrintWriter errorPrintWriter;
+
+    // Constructor para JFlex que permite pasar un PrintWriter
+    public lexicoAnalizador(java.io.Reader in, PrintWriter errorWriter) {
+        this(in); // Llama al constructor por defecto de JFlex
+        this.errorPrintWriter = errorWriter;
+    }
+
+    // Método para reportar errores léxicos
+    public void reportLexicalError(String message) {
+        if (errorPrintWriter != null) {
+            errorPrintWriter.println("Error léxico: " + message + " en línea " + (yyline + 1) + ", columna " + (yycolumn + 1));
+        } else {
+            System.err.println("Error léxico: " + message + " en línea " + (yyline + 1) + ", columna " + (yycolumn + 1));
+        }
+    }
 %}
 
 %cup
+
+
+LETTER = [a-zA-Z\u00C0-\u017F_] // Letras latinas con y sin tilde, ñ, etc. (ajusta el rango si necesitas más)
+DIGIT = [0-9]
+IDENTIFIER_CHAR = {LETTER} | {DIGIT}
 
 %%
 
@@ -39,11 +61,9 @@ import java_cup.runtime.Symbol;
 "FLOAT"           { return new Symbol(sym.TYPE_FLOAT, yyline, yycolumn); }
 "STRING"          { return new Symbol(sym.TYPE_STRING, yyline, yycolumn); }
 
-
 // Literales booleanos
 "TRUE"            { return new Symbol(sym.TRUE, yyline, yycolumn); }
 "FALSE"           { return new Symbol(sym.FALSE, yyline, yycolumn); }
-
 
 // Operadores aritméticos
 "+"               { return new Symbol(sym.PLUS, yyline, yycolumn); }
@@ -79,13 +99,18 @@ import java_cup.runtime.Symbol;
 
 
 // Identificadores y literales
-[0-9]+            { return new Symbol(sym.NUMERO, yyline, yycolumn, new Integer(yytext())); }
-[0-9]+"."[0-9]+   { return new Symbol(sym.FLOTANTE, yyline, yycolumn, new Float(yytext())); }
-\".*\"            { return new Symbol(sym.CADENA, yyline, yycolumn, yytext().substring(1, yytext().length()-1)); }
-[a-zA-Z_][a-zA-Z0-9_]* { return new Symbol(sym.IDENTIFICADOR, yyline, yycolumn, yytext()); }
+{DIGIT}+                   { return new Symbol(sym.NUMERO, yyline, yycolumn, new Integer(yytext())); }
+{DIGIT}+"."{DIGIT}+        { return new Symbol(sym.FLOTANTE, yyline, yycolumn, new Float(yytext())); }
+\" ([^\"\n\r\\] | \\. )* \" { return new Symbol(sym.CADENA, yyline, yycolumn, yytext().substring(1, yytext().length()-1)); }
+// La definición de IDENTIFICADOR ahora usa {LETTER} para incluir acentos y ñ
+{LETTER}({IDENTIFIER_CHAR})* { return new Symbol(sym.IDENTIFICADOR, yyline, yycolumn, yytext()); }
+
+
+// Comentarios de una sola línea (ignorar)
+"//"[^\r\n]* { /* ignorar */ }
 
 // Espacios y saltos de línea
-[ \t\r\n]+        { /* ignorar espacios */ }
+[ \t\r\n]+          { /* ignorar espacios */ }
 
 // Manejo de errores
-.                 { System.err.println("Carácter no reconocido: '" + yytext() + "' en línea " + (yyline + 1) + ", columna " + (yycolumn + 1)); }
+.                   { reportLexicalError("Carácter no reconocido: '" + yytext() + "'"); }

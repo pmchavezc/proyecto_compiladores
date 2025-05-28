@@ -2,65 +2,88 @@ package org.example;
 import java_cup.runtime.*;
 
 parser code {:
+    private java.io.PrintWriter outWriter;
+    private java.io.PrintWriter errWriter;
+
+    public parser(java_cup.runtime.Scanner s, java.io.PrintWriter out, java.io.PrintWriter err) {
+        this(s);
+        this.outWriter = out;
+        this.errWriter = err;
+    }
+
     public void report_error(String message, Object info) {
-        StringBuilder m = new StringBuilder("Error");
+        StringBuilder m = new StringBuilder("Error sintáctico"); // Más descriptivo
         if (info instanceof Symbol) {
             Symbol s = (Symbol) info;
             if (s.left >= 0) {
-                m.append(" en línea ").append(s.left + 1); 
+                m.append(" en línea ").append(s.left + 1);
             }
             if (s.right >= 0) {
                 m.append(", columna ").append(s.right + 1);
             }
+            // Agrega el valor del token si está disponible
             if (s.value != null) {
                 m.append(": '").append(s.value).append("'");
+            } else if (s.sym != -1 && sym.terminalNames != null && s.sym < sym.terminalNames.length) {
+                // Si el valor es null, intenta imprimir el nombre del terminal
+                m.append(": se encontró token tipo '").append(sym.terminalNames[s.sym]).append("'");
             }
         }
         m.append(" : ").append(message);
-        System.err.println(m);
-        //IMPRIME MENSAJES DE ERROR EN CONSOLA
+
+        if (errWriter != null) {
+            errWriter.println(m);
+        } else {
+            System.err.println(m);
+        }
     }
 
     public void report_fatal_error(String message, Object info) {
         report_error(message, info);
-        System.exit(1);
-        //IMPRIME EL VALOR FATAL Y TERMINA EL PROGRAMA
+        // No llamas a System.exit(1); en una aplicación web.
+        // En su lugar, lanzas una excepción para que Spring la capture y la reporte.
+        throw new RuntimeException("Error sintáctico fatal: " + message);
     }
 
     public void report_program_recognized() {
-        System.out.println("Programa reconocido correctamente.");
+        if (outWriter != null) {
+            outWriter.println("Análisis completado: Programa reconocido correctamente.");
+        } else {
+            System.out.println("Análisis completado: Programa reconocido correctamente.");
+        }
     }
 :};
 
-/* Terminales: Coinciden con los tokens que devuelve JFlex */
+/* Terminales */
 terminal DEFINE, FUNCTION, RETURN, IF, ELSE, ELSEIF, WHILE, LOOP, END, THEN, DO, PRINT;
 terminal SEMICOLON, COMMA, LPAREN, RPAREN, LBRACE, RBRACE, ASSIGN;
 terminal PLUS, MINUS, MULT, DIV;
 terminal EQEQ, NEQ, GTE, LTE, GT, LT;
 terminal AND, OR, NOT;
-
-terminal Integer NUMERO;      // Declaramos el tipo del valor que viene de JFlex
-terminal Float FLOTANTE;      // Declaramos el tipo del valor que viene de JFlex
-terminal String CADENA;      // Declaramos el tipo del valor que viene de JFlex
-terminal String IDENTIFICADOR; // Declaramos el tipo del valor que viene de JFlex
-terminal TRUE, FALSE; // Literales booleanos
-
+terminal Integer NUMERO;
+terminal Float FLOTANTE;
+terminal String CADENA;
+terminal String IDENTIFICADOR;
+terminal TRUE, FALSE;
 terminal TYPE_INT, TYPE_BOOLEAN, TYPE_FLOAT, TYPE_STRING;
 
 /* No terminales */
-nonterminal program;
-nonterminal statement;
-nonterminal statementList;
-nonterminal expr;
-nonterminal functionDef;
-nonterminal exprList;
-nonterminal paramList;
-nonterminal paramListOpt;
-nonterminal elseIfList;
-nonterminal elsePart;
+non terminal program;
+non terminal statement;
+non terminal statementList;
+non terminal expr;
+non terminal functionDef;
+non terminal exprList;
+non terminal paramList;
+non terminal paramListOpt;
+non terminal elseIfList;
+non terminal elsePart;
+non terminal block;
+non terminal type;
+non terminal varDeclaration;
 
 
-// Precedencia y asociatividad
+/* Precedencia y asociatividad */
 precedence left OR;
 precedence left AND;
 precedence left EQEQ, NEQ;
@@ -77,12 +100,29 @@ statementList ::= statementList:s statement:st
                 | statement:st
                 ;
 
-statement ::= DEFINE IDENTIFICADOR:id ASSIGN expr:e SEMICOLON
+statement ::= varDeclaration
             | functionDef
             | IF expr:cond THEN statementList:ifBody elseIfList:elseIfs elsePart:elseP END
             | WHILE expr:cond DO statementList:loopBody END
             | PRINT exprList:printItems SEMICOLON
+            | block
+            | RETURN expr:e SEMICOLON
+            | LOOP statementList:loopBody END
+            | DEFINE IDENTIFICADOR:id ASSIGN expr:e SEMICOLON
             ;
+
+varDeclaration ::= type:t IDENTIFICADOR:id SEMICOLON
+                 | type:t IDENTIFICADOR:id ASSIGN expr:e SEMICOLON
+                 ;
+
+type ::= TYPE_INT
+       | TYPE_BOOLEAN
+       | TYPE_FLOAT
+       | TYPE_STRING
+       ;
+
+// ÚNICA DEFINICIÓN DE LA REGLA 'block'
+block ::= LBRACE statementList:body RBRACE;
 
 elseIfList ::= elseIfList:list ELSEIF expr:cond THEN statementList:body
               | /* vacío */
@@ -92,7 +132,7 @@ elsePart ::= ELSE statementList:body
             | /* vacío */
             ;
 
-functionDef ::= FUNCTION IDENTIFICADOR:id LPAREN paramListOpt:params RPAREN statementList:body END
+functionDef ::= FUNCTION IDENTIFICADOR:id LPAREN paramListOpt:params RPAREN block:body END
               ;
 
 paramListOpt ::= paramList:p
@@ -109,24 +149,24 @@ exprList ::= expr:e
             | exprList:list COMMA expr:e
             ;
 
-expr ::= expr:e1 PLUS expr:e2      {: RESULT = "(" + e1 + " + " + e2 + ")"; :}
-        | expr:e1 MINUS expr:e2    {: RESULT = "(" + e1 + " - " + e2 + ")"; :}
-        | expr:e1 MULT expr:e2     {: RESULT = "(" + e1 + " * " + e2 + ")"; :}
-        | expr:e1 DIV expr:e2      {: RESULT = "(" + e1 + " / " + e2 + ")"; :}
-        | expr:e1 LT expr:e2       {: RESULT = "(" + e1 + " < " + e2 + ")"; :}
-        | expr:e1 GT expr:e2       {: RESULT = "(" + e1 + " > " + e2 + ")"; :}
-        | expr:e1 LTE expr:e2      {: RESULT = "(" + e1 + " <= " + e2 + ")"; :}
-        | expr:e1 GTE expr:e2      {: RESULT = "(" + e1 + " >= " + e2 + ")"; :}
-        | expr:e1 EQEQ expr:e2     {: RESULT = "(" + e1 + " == " + e2 + ")"; :}
-        | expr:e1 NEQ expr:e2      {: RESULT = "(" + e1 + " != " + e2 + ")"; :}
-        | expr:e1 AND expr:e2      {: RESULT = "(" + e1 + " && " + e2 + ")"; :}
-        | expr:e1 OR expr:e2       {: RESULT = "(" + e1 + " || " + e2 + ")"; :}
-        | NOT expr:e               {: RESULT = "!" + e; :}
-        | LPAREN expr:e RPAREN     {: RESULT = e; :}
-        | NUMERO:n                 {: RESULT = n.toString(); :}
-        | FLOTANTE:f               {: RESULT = f.toString(); :}
-        | IDENTIFICADOR:id         {: RESULT = id; :}
-        | CADENA:s                 {: RESULT = "\"" + s + "\""; :}
-        | TRUE                     {: RESULT = "TRUE"; :}
-        | FALSE                    {: RESULT = "FALSE"; :}
-        ;
+expr ::= IDENTIFICADOR:id         {: RESULT = id; :}
+       | NUMERO:n                 {: RESULT = n.toString(); :}
+       | FLOTANTE:f               {: RESULT = f.toString(); :}
+       | TRUE                     {: RESULT = "TRUE"; :}
+       | FALSE                    {: RESULT = "FALSE"; :}
+       | CADENA:s                 {: RESULT = "\"" + s + "\""; :}
+       | LPAREN expr:e RPAREN     {: RESULT = e; :}
+       | expr:e1 PLUS expr:e2     {: RESULT = "(" + e1 + " + " + e2 + ")"; :}
+       | expr:e1 MINUS expr:e2    {: RESULT = "(" + e1 + " - " + e2 + ")"; :}
+       | expr:e1 MULT expr:e2     {: RESULT = "(" + e1 + " * " + e2 + ")"; :}
+       | expr:e1 DIV expr:e2      {: RESULT = "(" + e1 + " / " + e2 + ")"; :}
+       | expr:e1 EQEQ expr:e2     {: RESULT = "(" + e1 + " == " + e2 + ")"; :}
+       | expr:e1 NEQ expr:e2      {: RESULT = "(" + e1 + " != " + e2 + ")"; :}
+       | expr:e1 LT expr:e2       {: RESULT = "(" + e1 + " < " + e2 + ")"; :}
+       | expr:e1 GT expr:e2       {: RESULT = "(" + e1 + " > " + e2 + ")"; :}
+       | expr:e1 LTE expr:e2      {: RESULT = "(" + e1 + " <= " + e2 + ")"; :}
+       | expr:e1 GTE expr:e2      {: RESULT = "(" + e1 + " >= " + e2 + ")"; :}
+       | expr:e1 AND expr:e2      {: RESULT = "(" + e1 + " && " + e2 + ")"; :}
+       | expr:e1 OR expr:e2       {: RESULT = "(" + e1 + " || " + e2 + ")"; :}
+       | NOT expr:e               {: RESULT = "!" + e; :}
+       ;
