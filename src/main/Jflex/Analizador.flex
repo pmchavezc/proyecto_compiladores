@@ -70,9 +70,9 @@ IDENTIFIER_CHAR = {LETTER} | {DIGIT}
 ">"               { return new Symbol(sym.MAYOR, yyline, yycolumn); }
 "<"               { return new Symbol(sym.MENOR, yyline, yycolumn); }
 
-"&&"              { return new Symbol(sym.Y_LOGICO, yyline, yycolumn); }
-"||"              { return new Symbol(sym.O_LOGICO, yyline, yycolumn); }
-"!"               { return new Symbol(sym.NEGACION, yyline, yycolumn); }
+"&&"              { return new Symbol(sym.AND, yyline, yycolumn); }
+"||"              { return new Symbol(sym.OR, yyline, yycolumn); }
+"!"               { return new Symbol(sym.NOT, yyline, yycolumn); }
 
 "="               { return new Symbol(sym.ASIGNACION, yyline, yycolumn); }
 "("               { return new Symbol(sym.PARENTESIS_IZQ, yyline, yycolumn); }

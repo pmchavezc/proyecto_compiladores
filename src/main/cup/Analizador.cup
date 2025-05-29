@@ -42,7 +42,7 @@ terminal DEFINE, FUNCTION, RETURN, IF, ELSE, ELSEIF, WHILE, LOOP, END, THEN, DO,
 terminal PUNTO_Y_COMA, COMA, PARENTESIS_IZQ, PARENTESIS_DER, LLAVE_IZQ, LLAVE_DER, ASIGNACION;
 terminal MAS, MENOS, MULTIPLICACION, DIVISION;
 terminal IGUAL_IGUAL, DIFERENTE, MAYOR_IGUAL, MENOR_IGUAL, MAYOR, MENOR;
-terminal Y_LOGICO, O_LOGICO, NEGACION;
+terminal AND,OR,NOT;
 terminal Integer NUMERO;
 terminal Float FLOTANTE;
 terminal String CADENA;
@@ -66,13 +66,13 @@ non terminal type;
 non terminal varDeclaration;
 
 /* Precedencia y asociatividad */
-precedence left O_LOGICO;
-precedence left Y_LOGICO;
+precedence left OR;
+precedence left AND;
 precedence left IGUAL_IGUAL, DIFERENTE;
 precedence left MENOR, MENOR_IGUAL, MAYOR, MAYOR_IGUAL;
 precedence left MAS, MENOS;
 precedence left MULTIPLICACION, DIVISION;
-precedence right NEGACION;
+precedence right NOT;
 
 start with program;
 
@@ -146,7 +146,7 @@ expr ::= IDENTIFICADOR:id         {: RESULT = id; :}
        | expr:e1 MAYOR expr:e2    {: RESULT = "(" + e1 + " > " + e2 + ")"; :}
        | expr:e1 MENOR_IGUAL expr:e2 {: RESULT = "(" + e1 + " <= " + e2 + ")"; :}
        | expr:e1 MAYOR_IGUAL expr:e2 {: RESULT = "(" + e1 + " >= " + e2 + ")"; :}
-       | expr:e1 Y_LOGICO expr:e2 {: RESULT = "(" + e1 + " && " + e2 + ")"; :}
-       | expr:e1 O_LOGICO expr:e2 {: RESULT = "(" + e1 + " || " + e2 + ")"; :}
-       | NEGACION expr:e          {: RESULT = "!" + e; :}
+       | expr:e1 AND expr:e2 {: RESULT = "(" + e1 + " && " + e2 + ")"; :}
+       | expr:e1 OR expr:e2 {: RESULT = "(" + e1 + " || " + e2 + ")"; :}
+       | NOT expr:e          {: RESULT = "!" + e; :}
        ;
